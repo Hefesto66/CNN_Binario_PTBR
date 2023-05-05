@@ -1,7 +1,3 @@
-
-# 2023, Carlos Silva
-# Contato: carlos.silva@axautomacao.com.br
-
 # Importar bibliotecas necessárias
 import os
 import numpy as np
@@ -12,19 +8,22 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropou
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
+# Inicializar estado do interpretador Python
+tf.config.set_soft_device_placement(True)
+
 # Verificar se a GPU está disponível
 physical_devices = tf.config.list_physical_devices('GPU')
 if len(physical_devices) > 0:
     tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    print('GPU disponível:', physical_devices[0])
-else:
-    print('Nenhuma GPU disponível.')
-
-tf.test.gpu_device_name()
+    gpu_name = tf.test.gpu_device_name()
+    if gpu_name:
+        print('GPU disponível:', gpu_name)
+    else:
+        print('Nenhuma GPU disponível.')
 
 # Definir parâmetros
 batch_size = 32
-epochs = 20
+epochs = 15
 learning_rate = 0.001
 
 # Carregar dados
@@ -58,22 +57,23 @@ x_test = np.expand_dims(x_test, axis=-1)
 
 # Definir modelo
 model = Sequential()
-model.add(Conv2D(32, (3, 3), padding='same', input_shape=(144, 177, 1)))
+model.add(Conv2D(16, (3, 3), padding='same', input_shape=(176, 144, 1)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+
+model.add(Conv2D(32, (3, 3), padding='same'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Conv2D(64, (3, 3), padding='same'))
 model.add(Activation('relu'))
-model.add(Conv2D(64, (3, 3)))
-model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
 
 model.add(Flatten())
-model.add(Dense(512))
+model.add(Dense(64))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
+
 model.add(Dense(1))
 model.add(Activation('sigmoid'))
 
@@ -119,3 +119,4 @@ plt.show()
 
 # Mensagem de confirmação
 print("O treinamento e avaliação do modelo foram concluídos com sucesso!")
+
